@@ -1170,7 +1170,7 @@ def _matches(text: str, patterns) -> bool:
 def _action_mode(conv: dict, merchant: Optional[dict]) -> dict:
     topic = (conv or {}).get("topic", "")
     topic_txt = f" on the {topic.replace('_', ' ')} thread" if topic and topic != "recall_due" else ""
-    body = (f"On it{topic_txt}. I'm preparing it now — draft will land here in 2 minutes. "
+    body = (f"On it{topic_txt}. I'm preparing it now - draft will land here in 2 minutes. "
             "Reply CONFIRM to go live, or tell me one tweak.")
     if _matches(body.lower(), QUALIFYING_TRAPS):
         body = "On it. Draft coming in 2 minutes — reply CONFIRM to go live."
@@ -1211,7 +1211,7 @@ async def reply(body: ReplyBody):
         if action == "send":
             out_body = kw.get("body", "")
             if out_body == conv.get("last_bot_body"):
-                out_body = out_body.rstrip(".") + " — anything you'd tweak?"
+                out_body = out_body.rstrip(".") + " - anything you'd tweak?"
             conv["last_bot_body"] = out_body
             conv["turns"].append({"from": "bot", "msg": out_body, "turn": turn})
             return {"action": "send", "body": _clean_body(out_body),
@@ -1238,7 +1238,7 @@ async def reply(body: ReplyBody):
         auto_reply_counts[mid] = n
         if n == 1:
             return respond("send",
-                           body=("Looks like an auto-reply 😊 When the owner sees this — just reply YES "
+                           body=("Looks like an auto-reply! When the owner sees this - just reply YES "
                                  "and I'll pick the conversation right back up."),
                            cta="binary",
                            rationale="Detected canned auto-reply; one light prompt so the owner engages when they see it")
@@ -1306,9 +1306,9 @@ async def reply(body: ReplyBody):
                        cta="open_ended",
                        rationale="Question acknowledged; committing to verified data instead of improvising facts")
 
-    # 9) unclear → brief acknowledgment + gentle redirect
+    # 9) unclear - brief acknowledgment + gentle redirect
     return respond("send",
-                   body=("Noted 👍 " + _redirect_body(conv, merchant)),
+                   body=("Noted - " + _redirect_body(conv, merchant)),
                    cta="open_ended",
                    rationale="Unclear reply; acknowledging and offering the lowest-friction next step")
 

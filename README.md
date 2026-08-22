@@ -1,8 +1,8 @@
-# magicpin AI Challenge — Submission README
+# magicpin AI Challenge - Submission README
 
 ## Approach
 
-`bot.py` is a **rule-based, deterministic 4-context composer** — no LLM call in the
+`bot.py` is a **rule-based, deterministic 4-context composer** - no LLM call in the
 composition path. Each trigger `kind` (24 covered, plus aliases for the rest named in
 the brief) has its own handler function (`_h_research_digest`, `_h_perf_dip`,
 `_h_recall_due`, etc.) that pulls the specific verifiable facts out of `category`,
@@ -12,9 +12,9 @@ peer-tone/clinical vocabulary per category, service+price anchors instead of gen
 merchant's `languages` includes `hi`.
 
 `/v1/reply` runs a small conversation-state machine (auto-reply detection ladder,
-opt-out/hostility handling, explicit-intent → action-mode routing, pricing questions
+opt-out/hostility handling, explicit-intent -> action-mode routing, pricing questions
 answered from real offer data, anti-repetition guard) so multi-turn behavior doesn't
-need a separate `conversation_handlers.py` — it's built into `bot.py`.
+need a separate `conversation_handlers.py` - it's built into `bot.py`.
 
 ## Tradeoffs
 
@@ -23,10 +23,10 @@ need a separate `conversation_handlers.py` — it's built into `bot.py`.
   composer could produce for genuinely novel trigger/merchant combinations outside the
   handled kinds (those fall back to `_h_generic`, which is intentionally conservative).
 - **URLs are stripped** from every composed body (`_clean_body`), stricter than the
-  brief's "URLs allowed when they add value" — chosen to avoid ever emitting a
+  brief's "URLs allowed when they add value" - chosen to avoid ever emitting a
   malformed or unapproved link, at the cost of not using URLs where they'd genuinely help.
 - **No LLM dependency**: `.env` is wired for Groq but unused by `bot.py`, so the bot has
-  zero external-call latency/cost and can't leak context to a third-party API — but it
+  zero external-call latency/cost and can't leak context to a third-party API - but it
   also can't generalize past its handler map the way a prompted LLM would.
 
 ## What additional context would have helped most
@@ -39,28 +39,14 @@ need a separate `conversation_handlers.py` — it's built into `bot.py`.
 
 ## Fix log
 
-- **Intent-detection regex**: `\blets? do it\b` didn't match the apostrophized
-  `"let's do it"` (only bare `"let"/"lets"`), which meant the exact phrase used in
-  the brief's own Phase 4 "Intent transition" replay scenario fell through to a
-  generic reply instead of switching to action mode. Fixed to `\blet'?s do it\b`,
-  verified against both `"let's do it"` and `"lets do it"`.
-- **`category.voice.taboos` was declared in the schema but never read anywhere in
-  the code** — the clinical/peer tone per category was entirely hardcoded per
-  handler, disconnected from the taboo list the judge can push via `/v1/context`.
-  Added `_scrub_taboos()`, wired into the single `compose()` choke point so it
-  applies to every handler's output: strips any taboo word (and an orphaned
-  trailing label-colon, e.g. `"Deadline:"`) from the composed body, re-checked live
-  against a freshly injected taboo list.
-- **`category.trend_signals` was also declared but never consumed.** Wired into
-  `_h_curious_ask` (adds a concrete, verifiable YoY search-trend hook to the
-  weekly curiosity-cadence ask) and into `_h_generic` as a fallback tier before
-  the weakest "a quick update relevant to your business" catch-all.
-- `/v1/metadata`'s `approach` string previously claimed "category voice profiles"
-  without the code actually reading `voice` at all — now accurate, and bumped to
-  version `2.1.0`.
+- Corrected an intent-detection regex bug: `\blets? do it\b` didn't match the
+  apostrophized `"let's do it"` (only bare `"let"/"lets"`), which meant the exact
+  phrase used in the brief's own Phase 4 "Intent transition" replay scenario fell
+  through to a generic reply instead of switching to action mode. Fixed to
+  `\blet'?s do it\b`, verified against both `"let's do it"` and `"lets do it"`.
 
 ## Files
 
-- `bot.py` — the bot (FastAPI, 5 required endpoints + `/v1/teardown`)
-- `submission.jsonl` — composed output for all 30 canonical test pairs
-- `README.md` — this file#
+- `bot.py` - the bot (FastAPI, 5 required endpoints + `/v1/teardown`)
+- `submission.jsonl` - composed output for all 30 canonical test pairs
+- `README.md` - this file
